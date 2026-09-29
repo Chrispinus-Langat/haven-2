@@ -41,11 +41,32 @@ menuButton.addEventListener('click', () => {
 
 document.querySelectorAll('#mobileMenu a').forEach((link) => link.addEventListener('click', () => mobileMenu.classList.remove('open')))
 
-form.addEventListener('submit', (event) => {
+form.addEventListener('submit', async (event) => {
   event.preventDefault()
-  form.reset()
-  formMessage.textContent = 'We got your note. We will be in touch soon with something sweet.'
-  formMessage.classList.remove('hidden')
+  const submitButton = form.querySelector('button[type="submit"]')
+  const originalLabel = submitButton.innerHTML
+  submitButton.disabled = true
+  submitButton.innerHTML = 'Sending…'
+  formMessage.classList.add('hidden')
+
+  try {
+    const response = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.fromEntries(new FormData(form))),
+    })
+    const result = await response.json()
+    if (!response.ok) throw new Error(result.error)
+    form.reset()
+    formMessage.textContent = 'We got your note. We will be in touch soon with something sweet.'
+    formMessage.classList.remove('hidden')
+  } catch (error) {
+    formMessage.textContent = error.message || 'Something went wrong. Please try again.'
+    formMessage.classList.remove('hidden')
+  } finally {
+    submitButton.disabled = false
+    submitButton.innerHTML = originalLabel
+  }
 })
 
 renderCakes()
