@@ -23,6 +23,13 @@
     .cake-card:hover img { transform:scale(1.04); }
     .marquee { animation: drift 24s linear infinite; white-space:nowrap; }
     @keyframes drift { to { transform:translateX(-25%); } }
+    .reveal { opacity:0; transform:translateY(20px); transition:opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+    .toast { transform:translate(-50%, 18px); opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease; }
+    .toast.show { transform:translate(-50%, 0); opacity:1; }
+    #cartDrawer { transform:translateX(100%); }
+    #cartDrawer.drawer-open { transform:translateX(0); }
+    #cartOverlay.overlay-open { display:block; opacity:1; }
     @media (prefers-reduced-motion: reduce) { *, .marquee { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
   </style>
 </head>
@@ -50,7 +57,14 @@
 
     <section id="contact" class="grid bg-cocoa text-cream lg:grid-cols-2"><div class="px-5 py-16 sm:px-12 lg:px-20 lg:py-24"><p class="eyebrow mb-5 text-rose">Let&apos;s make it special</p><h2 class="display text-4xl sm:text-5xl">Have a celebration<br><em>in mind?</em></h2><p class="mt-7 max-w-md leading-7 text-cream/70">Tell us what you&apos;re dreaming up. We&apos;ll get back to you within one business day with ideas, availability, and a little magic.</p><div class="mt-10 flex flex-col gap-3 text-sm text-cream/80"><span>⌖ 218 Court Street, Brooklyn</span><span>✉ hello@cakehaven.co</span></div></div><form id="contactForm" class="flex flex-col gap-5 bg-cream px-5 py-16 text-ink sm:px-12 lg:px-20 lg:py-24"><div class="flex justify-between text-xs font-bold uppercase tracking-widest"><span>Custom orders</span><span>Reply in 1 day</span></div><label class="text-xs font-bold">Name<input required name="name" class="mt-2 w-full border-b border-stone-300 bg-transparent py-3 outline-none focus:border-cocoa" type="text" placeholder="Your name"></label><label class="text-xs font-bold">Email<input required name="email" class="mt-2 w-full border-b border-stone-300 bg-transparent py-3 outline-none focus:border-cocoa" type="email" placeholder="you@email.com"></label><label class="text-xs font-bold">Tell us a little about your celebration<textarea required name="message" class="mt-2 w-full resize-none border-b border-stone-300 bg-transparent py-3 outline-none focus:border-cocoa" rows="3" placeholder="Date, servings, flavor dreams..."></textarea></label><button class="mt-3 inline-flex items-center justify-center gap-3 rounded-full bg-cocoa px-6 py-3 text-sm font-semibold text-cream hover:bg-ink" type="submit">Start a conversation <span>→</span></button><p id="formMessage" class="hidden text-center text-sm text-cocoa"></p></form></section>
   </main>
+  <div id="cartOverlay" class="fixed inset-0 z-40 hidden bg-ink/40 opacity-0 transition-opacity" aria-hidden="true"></div>
+  <aside id="cartDrawer" class="fixed right-0 top-0 z-50 flex h-full w-full max-w-md translate-x-full flex-col bg-cream p-6 shadow-2xl transition-transform duration-300" aria-label="Shopping bag" aria-hidden="true">
+    <div class="flex items-center justify-between border-b border-stone-200 pb-5"><div><p class="eyebrow text-cocoa">Your bag</p><h2 class="display mt-2 text-3xl">Sweet choices</h2></div><button id="closeCart" class="grid size-10 place-items-center rounded-full border border-stone-300 text-xl" aria-label="Close shopping bag">×</button></div>
+    <div id="cartItems" class="flex flex-1 flex-col gap-4 overflow-auto py-6"><p class="text-sm text-stone-500">Your bag is waiting for something delicious.</p></div>
+    <div class="border-t border-stone-200 pt-5"><div class="flex justify-between text-sm"><span>Subtotal</span><strong id="cartTotal">$0</strong></div><a href="#contact" id="checkoutButton" class="mt-5 flex w-full items-center justify-center rounded-full bg-cocoa px-6 py-3 text-sm font-semibold text-cream transition hover:bg-ink">Start your order <span class="ml-2">→</span></a></div>
+  </aside>
   <footer class="bg-cream px-5 py-10 lg:px-10"><div class="mx-auto flex max-w-7xl flex-col justify-between gap-8 md:flex-row md:items-center"><a href="#top" class="flex items-center gap-3"><span class="grid size-10 place-items-center rounded-full bg-cocoa text-xs font-bold text-cream">CH</span><span class="display text-lg">Cake Haven</span></a><p class="text-sm text-stone-500">Beautiful cakes for ordinary days<br>and extraordinary ones.</p><div class="flex gap-3"><a class="grid size-9 place-items-center rounded-full border border-stone-300 text-xs" href="https://instagram.com" aria-label="Instagram">IG</a><a class="grid size-9 place-items-center rounded-full border border-stone-300 text-xs" href="mailto:hello@cakehaven.co" aria-label="Email">@</a></div></div><div class="mx-auto mt-10 flex max-w-7xl flex-col gap-2 border-t border-stone-200 pt-5 text-[10px] uppercase tracking-widest text-stone-400 sm:flex-row sm:justify-between"><span>© 2026 Cake Haven Patisserie</span><span>Made with care in Brooklyn, NY</span><span>Privacy · Terms</span></div></footer>
+  <div id="toast" class="toast fixed bottom-6 left-1/2 z-[60] rounded-full bg-cocoa px-5 py-3 text-sm font-semibold text-cream shadow-xl" role="status" aria-live="polite"></div>
   <script src="./script.js"></script>
 </body>
 </html>
