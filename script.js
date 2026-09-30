@@ -20,6 +20,14 @@ const formMessage = $('#formMessage')
 let cart = []
 let toastTimer
 
+function saveCart() {
+  sessionStorage.setItem('cake-haven-cart', JSON.stringify(cart))
+}
+
+function loadCart() {
+  try { cart = JSON.parse(sessionStorage.getItem('cake-haven-cart') || '[]') } catch { cart = [] }
+}
+
 function money(value) { return `$${value}` }
 function showToast(message) {
   toast.textContent = message
@@ -52,8 +60,10 @@ function renderCart() {
   bagCount.textContent = count
   bagButton.setAttribute('aria-label', `Shopping bag, ${count} items`)
   cartTotal.textContent = money(cart.reduce((total, item) => total + item.price * item.quantity, 0))
-  cartItems.innerHTML = cart.length ? cart.map((item, index) => `<div class="flex items-center gap-3"><img class="size-16 rounded-xl object-cover" src="${item.image}" alt=""><div class="min-w-0 flex-1"><strong class="display block truncate text-lg">${item.name}</strong><span class="text-xs text-stone-500">${money(item.price)} · Qty ${item.quantity}</span></div><button class="remove-item rounded-full border border-stone-300 px-3 py-1 text-xs" data-index="${index}" aria-label="Remove ${item.name}">Remove</button></div>`).join('') : '<p class="text-sm text-stone-500">Your bag is waiting for something delicious.</p>'
+  cartItems.innerHTML = cart.length ? cart.map((item, index) => `<div class="flex items-center gap-3"><img class="size-16 rounded-xl object-cover" src="${item.image}" alt="${item.name}"><div class="min-w-0 flex-1"><strong class="display block truncate text-lg">${item.name}</strong><span class="text-xs text-stone-500">${money(item.price)} each</span><div class="mt-2 inline-flex items-center rounded-full border border-stone-200 bg-white"><button class="quantity-button grid size-7 place-items-center text-sm" data-index="${index}" data-change="-1" aria-label="Decrease ${item.name}">−</button><span class="w-6 text-center text-xs font-semibold">${item.quantity}</span><button class="quantity-button grid size-7 place-items-center text-sm" data-index="${index}" data-change="1" aria-label="Increase ${item.name}">+</button></div></div><button class="remove-item rounded-full border border-stone-300 px-3 py-1 text-xs" data-index="${index}" aria-label="Remove ${item.name}">Remove</button></div>`).join('') : '<p class="text-sm text-stone-500">Your bag is waiting for something delicious.</p>'
+  document.querySelectorAll('.quantity-button').forEach((button) => button.addEventListener('click', () => { const item = cart[Number(button.dataset.index)]; item.quantity += Number(button.dataset.change); if (item.quantity <= 0) cart.splice(Number(button.dataset.index), 1); renderCart() }))
   document.querySelectorAll('.remove-item').forEach((button) => button.addEventListener('click', () => { cart.splice(Number(button.dataset.index), 1); renderCart() }))
+  saveCart()
 }
 function setCartOpen(open) {
   cartDrawer.classList.toggle('drawer-open', open)
@@ -68,7 +78,7 @@ $('#closeCart').addEventListener('click', () => setCartOpen(false))
 cartOverlay.addEventListener('click', () => setCartOpen(false))
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') setCartOpen(false) })
 menuButton.addEventListener('click', () => { const open = mobileMenu.classList.toggle('open'); menuButton.setAttribute('aria-label', open ? 'Close menu' : 'Open menu'); menuButton.querySelector('span').textContent = open ? '×' : '☰' })
-document.querySelectorAll('#mobileMenu a').forEach((link) => link.addEventListener('click', () => mobileMenu.classList.remove('open')))
+document.querySelectorAll('#mobileMenu a').forEach((link) => link.addEventListener('click', () => { mobileMenu.classList.remove('open'); menuButton.setAttribute('aria-label', 'Open menu'); menuButton.querySelector('span').textContent = '☰' }))
 form.addEventListener('submit', async (event) => {
   event.preventDefault()
   const submitButton = form.querySelector('button[type="submit"]')
@@ -85,6 +95,7 @@ form.addEventListener('submit', async (event) => {
   finally { submitButton.disabled = false; submitButton.innerHTML = originalLabel }
 })
 const observer = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target) } }), { threshold: 0.12 })
+loadCart()
 renderCakes()
 document.querySelectorAll('section, .cake-card').forEach((element) => { if (!element.classList.contains('cake-card')) element.classList.add('reveal'); observer.observe(element) })
 renderCart()
